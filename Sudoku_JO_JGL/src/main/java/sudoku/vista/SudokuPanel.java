@@ -1,5 +1,6 @@
 package sudoku.vista;
 
+import sudoku.excepciones.MovimientoInvalidoException;
 import sudoku.modelo.Sudoku;
 
 import javax.swing.*;
@@ -32,11 +33,11 @@ public class SudokuPanel extends JPanel {
                 campo.setHorizontalAlignment(JTextField.CENTER);
                 campo.setFont(fuente);
                 campo.setBorder(BorderFactory.createMatteBorder(
-                        (fila % 3 == 0 ? 3 : 1),     // borde superior más grueso cada 3 filas
-                        (col % 3 == 0 ? 3 : 1),     // borde izquierdo más grueso cada 3 columnas
-                        (fila == 8 ? 3 : 1),        // borde inferior más grueso al final
-                        (col == 8 ? 3 : 1),         // borde derecho más grueso al final
-                        new Color(160, 185, 217)    // mismo color neutro que usabas
+                        (fila % 3 == 0 ? 3 : 1),
+                        (col % 3 == 0 ? 3 : 1),
+                        (fila == 8 ? 3 : 1),
+                        (col == 8 ? 3 : 1),
+                        new Color(160, 185, 217)
                 ));
 
                 campo.setOpaque(true);
@@ -74,7 +75,6 @@ public class SudokuPanel extends JPanel {
     public void setSudoku(Sudoku sudoku) {
         this.sudoku = sudoku;
 
-        // Actualizar celdas con los valores del tablero
         int[][] tablero = sudoku.getTablero();
         for (int fila = 0; fila < 9; fila++) {
             for (int col = 0; col < 9; col++) {
@@ -134,29 +134,31 @@ public class SudokuPanel extends JPanel {
             if (texto.isEmpty()) return;
 
             int valor = Integer.parseInt(texto);
-            if (!sudoku.esMovimientoValido(fila, col, valor)) {
-                erroresRestantes--;
-                mensajeLabel.setForeground(Color.RED);
-                mensajeLabel.setText("❌ Número incorrecto.");
-                erroresLabel.setText("Errores restantes: " + erroresRestantes);
-                campo.setText("");
 
-                if (erroresRestantes <= 0) {
-                    mensajeLabel.setText("Has cometido demasiados errores.");
-                    desactivarTablero();
-                }
+            // ✅ Usa el nuevo método con excepción
+            sudoku.colocarNumeroConExcepcion(fila, col, valor);
 
-            } else {
-                sudoku.colocarNumero(fila, col, valor);
-                campo.setEditable(false);
-                campo.setBackground(new Color(204, 255, 204));
-                mensajeLabel.setForeground(new Color(0, 128, 0));
-                mensajeLabel.setText("✔️ Número válido. Celda bloqueada.");
+            campo.setEditable(false);
+            campo.setBackground(new Color(204, 255, 204));
+            mensajeLabel.setForeground(new Color(0, 128, 0));
+            mensajeLabel.setText("✔️ Número válido. Celda bloqueada.");
 
-                if (sudoku.estaResuelto()) {
-                    onSudokuResuelto.run();
-                }
+            if (sudoku.estaResuelto()) {
+                onSudokuResuelto.run();
             }
+
+        } catch (MovimientoInvalidoException e) {
+            erroresRestantes--;
+            mensajeLabel.setForeground(Color.RED);
+            mensajeLabel.setText(e.getMessage());
+            erroresLabel.setText("Errores restantes: " + erroresRestantes);
+            campo.setText("");
+
+            if (erroresRestantes <= 0) {
+                mensajeLabel.setText("Has cometido demasiados errores.");
+                desactivarTablero();
+            }
+
         } catch (NumberFormatException e) {
             erroresRestantes--;
             mensajeLabel.setForeground(Color.RED);
