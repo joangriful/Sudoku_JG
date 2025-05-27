@@ -20,4 +20,3 @@ Esta matriz relaciona los requisitos funcionales (RF) y no funcionales (RNF) con
 | RNF6      | Ejecución fluida sin bloqueos                                | Eventos con `SwingUtilities.invokeLater`                       | Comportamiento observado                  |
 | RNF7      | Manejo de errores con excepciones                            | `MovimientoInvalidoException`, `SudokuException`               | `SudokuTest.testExcepciones()`           |
 
-✅ Esta matriz asegura trazabilidad bidireccional entre los requisitos, el diseño y las pruebas, permitiendo verificar que todos los aspectos están cubiertos.
